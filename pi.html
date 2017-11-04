@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Reimann's Theory of Pi</title>
+  <style type="text/css">
+    * {
+      padding: 0;
+      margin: 0;
+      box-sizing: border-box;
+    }
+    ul {
+      margin-left: 30px;
+    }
+    .explanation {
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 70%;
+      height: 100%;
+      padding: 10px;
+      background: #eeeeee;
+      border-bottom: 1px solid #bfbfbf;
+      overflow-y: auto;
+    }
+    .explanation article {
+      margin-bottom: 30px;
+    }
+    .results-list {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 30%;
+      height: 100%;
+      background: #fbfbfb;
+      resize: both;
+    }
+    .latest-result {
+      background: #006699;
+      color: #ffffff;
+      padding: 5px;
+      font-size: 20px;
+      font-weight: bold;
+      padding: 10px;
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      height: 66px;
+      width: 100%;
+      overflow: auto;
+    }
+    .previous-results {
+      height: calc(100% - 66px);
+      width: 100%;
+      overflow: auto;
+      top: 0;
+      left: 0;
+      padding: 10px;
+    }
+    h1 {
+      color: gray;
+      font-weight: normal;
+      margin-bottom: 10px;
+    }
+    a {
+      color: #006699;
+      text-decoration: none;
+    }
+    a:hover {
+      transition: background 250ms;
+      background: #006699;
+      color: #ffffff;
+    }
+  </style>
+</head>
+<body>
+  <div class="explanation">
+    <article>
+      <h1>Program settings</h1>
+      <div><label><input id="auto-scroll" type="checkbox" checked="true"> Enable automatic scrolling</label></div>
+      <div>
+        <label>
+          Computation speed:
+          <select id="compute-speed">
+            <option checked="true">Low</option>
+            <option>Medium</option>
+            <option>High</option>
+            <option>Max</option>
+            <option>Max++</option>
+          </select>
+        </label>
+      </div>
+      <div>
+        <input id="push-button" type="button" value="Play">
+      </div>
+    </article>
+    <article>
+      <h1>Warning</h1>
+      <ul>
+        <li>Try at your own risk! At first the program does not require a that much and can run even on low specs devices, but as the program continues to calculate, it will require more and more <strong>memory</strong> which in some devices can cause a <strong>memory overflow</strong> (But it might take a very long time for you to reach that point).</li>
+        <li>The viewport is was not made to be compatible with small devices, I strongly recommend you use a desktop computer, or anything similar, for this.</li>
+      </ul>
+    </article>
+    <article>
+      <h1>Riemann hypothesis</h1>
+      <p>Bernhard Riemann theorized that <strong>pi = infinity - infinity</strong>.</p>
+      <p>Let's find out!</p>
+      <p>Watch here > <a href="https://www.youtube.com/watch?v=-EtHF5ND3_s" target="_blank">https://www.youtube.com/watch?v=-EtHF5ND3_s</a></p>
+      <p>Read here > <a href="https://www.quora.com/What-is-the-Riemann-hypothesis" target="_blank">https://www.quora.com/What-is-the-Riemann-hypothesis</a></p>
+    </article>
+    <article>
+      <h1>Mechanics</h1>
+      <ul>
+        <li>The program follows the pattern (1 - 1 / 2) + 1/3 - 1/4 + 1/5-.....1/n; where n is an increasing number from 2 to infinity.</li>
+        <li>The operation is alternating addition and subtraction. If n is an odd number the operation would be subtraction, if n is an even number the operation would be addition</li>
+        <li>Each sum is called <strong>Partial Sum</strong>.</li>
+        <li>The latest partial sum is highlighted with blue background and white text. You can also see the counter at the bottom of it, the counter represents how many times the program have computed.</li>
+        <li>The program will also check if the latest sum has occured before, if so, a text saying <strong>Repeated</strong> will appear after that number.</li>
+      </ul>
+    </article>
+  </div>
+  <div class="results-list">
+    <div class="previous-results"></div>
+    <div class="latest-result">
+      <p>Latest partial sum will show here.</p>
+      <p>Counter will show here</p>
+    </div>
+  </div>
+  <script type="text/javascript">
+    document.body.onload = function() {
+      var calculator = new calculatorClass();
+      var pushButton = document.querySelector('#push-button');
+
+      function calculatorClass() {
+        this.playing = false;
+        this.playing = false;
+        this.partialSums = [];
+        this.lastPartialSum = 1;
+        this.counter = 2;
+
+        this.togglePlay = function() {
+          this.playing = !this.playing;
+
+          return this;
+        }
+
+        this.isPlaying = function() {
+          return this.playing;
+        }
+
+        this.incrementCounter = function() {
+          this.counter = this.counter + 1;
+
+          return this;
+        }
+
+        this.addPartialSum = function(sum) {
+          this.partialSums.push(sum);
+          this.lastPartialSum = sum;
+
+          return this;
+        }
+
+        return this;
+      };
+
+      function calculate() {
+        if (calculator.isPlaying()) {
+          var latestResult = document.querySelector('.latest-result');
+          var previousResults = document.querySelector('.previous-results');
+          var enabledAutoscroll = document.querySelector('#auto-scroll').checked;
+
+          var sum = calculator.counter % 2 == 0? calculator.lastPartialSum - (1 / calculator.counter) : calculator.lastPartialSum + (1 / calculator.counter);
+
+          previousResults.innerHTML += '<p>'+ calculator.lastPartialSum + (calculator.partialSums.indexOf(sum) > 0? ' | REPEATED' : '') +'</p>';
+          latestResult.innerHTML = '<p>'+ sum + (calculator.partialSums.indexOf(sum) > 0? ' | REPEATED' : '') +'</p><p>n = '+ (calculator.counter - 1) +'</p>';
+
+          if (enabledAutoscroll) {
+            previousResults.scrollTo(0, previousResults.scrollHeight);
+          }
+
+          calculator.incrementCounter();
+          calculator.addPartialSum(sum);
+
+          switch (document.querySelector('#compute-speed').value.toLowerCase()) {
+            case 'low':
+              return setTimeout(calculate, 500);
+            case 'medium':
+              return setTimeout(calculate, 300);
+            case 'high':
+              return setTimeout(calculate, 150);
+            case 'max':
+              return setTimeout(calculate, 90);
+            case 'max++':
+              return setTimeout(calculate, 20);
+          }
+        }
+      }
+
+      pushButton.onclick = function(clickEvent) {
+        calculator.togglePlay();
+        calculate();
+
+        if (calculator.isPlaying()) {
+          pushButton.value = 'Pause';
+        } else {
+          pushButton.value = 'Play';
+        }
+      };
+    };
+  </script>
+</body>
+</html>
