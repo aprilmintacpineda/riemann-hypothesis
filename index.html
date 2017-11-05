@@ -141,7 +141,11 @@
 
         this.togglePlay = function() {
           this.playing = !this.playing;
+          return this;
+        }
 
+        this.stop = function() {
+          this.playing = false;
           return this;
         }
 
@@ -151,49 +155,52 @@
 
         this.incrementCounter = function() {
           this.counter = this.counter + 1;
-
           return this;
         }
 
         this.addPartialSum = function(sum) {
           this.partialSums.push(sum);
           this.lastPartialSum = sum;
-
           return this;
         }
 
         return this;
-      };
+      }
 
       function calculate() {
         if (calculator.isPlaying()) {
-          var latestResult = document.querySelector('.latest-result');
-          var previousResults = document.querySelector('.previous-results');
-          var enabledAutoscroll = document.querySelector('#auto-scroll').checked;
+          if (isNaN(calculator.lastPartialSum)) {
+            latestResult.innerHTML = '<p>LIMIT has been reached.</p><p>n = '+ (calculator.counter - 1) +'</p>';
+            calculator.stop();
+          } else {
+            var latestResult = document.querySelector('.latest-result');
+            var previousResults = document.querySelector('.previous-results');
+            var enabledAutoscroll = document.querySelector('#auto-scroll').checked;
 
-          var sum = calculator.counter % 2 == 0? calculator.lastPartialSum - (1 / calculator.counter) : calculator.lastPartialSum + (1 / calculator.counter);
+            var sum = calculator.counter % 2 == 0? calculator.lastPartialSum - (1 / calculator.counter) : calculator.lastPartialSum + (1 / calculator.counter);
 
-          previousResults.innerHTML += '<p>'+ calculator.lastPartialSum + (calculator.partialSums.indexOf(sum) > 0? ' | REPEATED' : '') +'</p>';
-          latestResult.innerHTML = '<p>'+ sum + (calculator.partialSums.indexOf(sum) > 0? ' | REPEATED' : '') +'</p><p>n = '+ (calculator.counter - 1) +'</p>';
+            previousResults.innerHTML += '<p>'+ calculator.lastPartialSum + (calculator.partialSums.indexOf(sum) > -1? ' | REPEATED' : '') +'</p>';
+            latestResult.innerHTML = '<p>'+ sum + (calculator.partialSums.indexOf(sum) > -1? ' | REPEATED' : '') +'</p><p>n = '+ (calculator.counter - 1) +'</p>';
 
-          if (enabledAutoscroll) {
-            previousResults.scrollTo(0, previousResults.scrollHeight);
-          }
+            if (enabledAutoscroll) {
+              previousResults.scrollTo(0, previousResults.scrollHeight);
+            }
 
-          calculator.incrementCounter();
-          calculator.addPartialSum(sum);
+            calculator.incrementCounter();
+            calculator.addPartialSum(sum);
 
-          switch (document.querySelector('#compute-speed').value.toLowerCase()) {
-            case 'low':
-              return setTimeout(calculate, 500);
-            case 'medium':
-              return setTimeout(calculate, 300);
-            case 'high':
-              return setTimeout(calculate, 150);
-            case 'max':
-              return setTimeout(calculate, 90);
-            case 'max++':
-              return setTimeout(calculate, 20);
+            switch (document.querySelector('#compute-speed').value.toLowerCase()) {
+              case 'low':
+                return setTimeout(calculate, 500);
+              case 'medium':
+                return setTimeout(calculate, 300);
+              case 'high':
+                return setTimeout(calculate, 150);
+              case 'max':
+                return setTimeout(calculate, 90);
+              case 'max++':
+                return setTimeout(calculate, 20);
+            }
           }
         }
       }
